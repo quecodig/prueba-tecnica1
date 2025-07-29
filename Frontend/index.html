@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>Productos</h1>
+     <form id="form-producto">
+        <input type="hidden" id="producto-id">
+        <input type="text" id="producto-nombre" placeholder="Nombre" required>
+        <input type="text" id="producto-descripcion" placeholder="Descripción" required>
+        <input type="number" id="producto-precio" placeholder="Precio" required>
+        <input type="number" id="producto-stock" placeholder="Stock" required>
+        <button type="submit">Guardar</button>
+        <button type="button" id="cancelar-edicion" style="display:none;">Cancelar</button>
+    </form>
+    <table id="productos">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        const API = 'http://localhost:8000/api/products/';
+        const tbody = document.querySelector('#productos tbody');
+        const form = document.getElementById('form-producto');
+        const cancelarBtn = document.getElementById('cancelar-edicion');
+
+        const cargarProductos = () =>{
+            fetch(API)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success' && Array.isArray(data.data)) {
+                        const tbody = document.querySelector('#productos tbody');
+                        data.data.forEach(producto => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${producto.id}</td>
+                                <td>${producto.name}</td>
+                                <td>${producto.description}</td>
+                                <td>${producto.price}</td>
+                                <td>${producto.stock}</td>
+                                <td>
+                                    <button onclick="editarProducto(${producto.id}, '${producto.name}', '${producto.description}', ${producto.price}, ${producto.stock})">Editar</button>
+                                    <button onclick="eliminarProducto(${producto.id})">Eliminar</button>
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        alert('No se pudieron cargar los productos');
+                    }
+                })
+                .catch(() => alert('Error al conectar con la API'));
+        };
+
+        window.editarProducto = function(id, name, description, price, stock) {
+            document.getElementById('producto-id').value = id;
+            document.getElementById('producto-nombre').value = name;
+            document.getElementById('producto-descripcion').value = description;
+            document.getElementById('producto-precio').value = price;
+            document.getElementById('producto-stock').value = stock;
+            cancelarBtn.style.display = 'inline';
+        }
+
+         window.eliminarProducto = function(id) {
+            if(confirm('¿Seguro que deseas eliminar este producto?')) {
+                fetch(API + id, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(() => cargarProductos());
+            }
+        }
+
+        cancelarBtn.onclick = function() {
+            form.reset();
+            document.getElementById('producto-id').value = '';
+            cancelarBtn.style.display = 'none';
+        }
+
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            const id = document.getElementById('producto-id').value;
+            const producto = {
+                name: document.getElementById('producto-nombre').value,
+                description: document.getElementById('producto-descripcion').value,
+                price: parseFloat(document.getElementById('producto-precio').value),
+                stock: parseInt(document.getElementById('producto-stock').value)
+            };
+            if(id) {
+                // Update
+                fetch(API + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                })
+                .then(res => res.json())
+                .then(() => {
+                    form.reset();
+                    cancelarBtn.style.display = 'none';
+                    cargarProductos();
+                });
+            } else {
+                // Create
+                fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                })
+                .then(res => res.json())
+                .then(() => {
+                    form.reset();
+                    cargarProductos();
+                });
+            }
+        }
+
+        cargarProductos()
+    </script>
+</body>
+</html>
