@@ -51,7 +51,12 @@
 			}
 		}
 
-		public function create($data) {
+		public function create() {
+			$data = json_decode(file_get_contents("php://input"), true);
+			if (empty($data)) {
+				ResponseHelper::sendError("No data provided for creation", 400);
+				return;
+			}
 			$newProduct = $this->model->create($data);
 			if ($newProduct) {
 				ResponseHelper::sendSuccess("Product created successfully", 201);

@@ -96,7 +96,7 @@
         form.onsubmit = function(e) {
             e.preventDefault();
             const id = document.getElementById('producto-id').value;
-            const producto = {
+            const productoUpdate = {
                 name: document.getElementById('producto-nombre').value,
                 description: document.getElementById('producto-descripcion').value,
                 price: parseFloat(document.getElementById('producto-precio').value),
@@ -107,12 +107,13 @@
                 fetch(API + id, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(producto)
+                    body: JSON.stringify(productoUpdate)
                 })
                 .then(res => res.json())
                 .then(() => {
                     form.reset();
                     cancelarBtn.style.display = 'none';
+                    tbody.innerHTML = '';
                     cargarProductos();
                 });
             } else {
@@ -120,11 +121,12 @@
                 fetch(API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(producto)
+                    body: JSON.stringify(productoUpdate)
                 })
                 .then(res => res.json())
                 .then(() => {
                     form.reset();
+                    tbody.innerHTML = '';
                     cargarProductos();
                 });
             }

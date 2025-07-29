@@ -21,16 +21,20 @@
 		}
 
 		public function create($data) {
-			$stmt = $this->db->prepare("INSERT INTO products (name, description) VALUES (:name, :description)");
+			$stmt = $this->db->prepare("INSERT INTO products (name, description, price, stock) VALUES (:name, :description, :price, :stock)");
 			$stmt->bindParam(':name', $data['name']);
 			$stmt->bindParam(':description', $data['description']);
+			$stmt->bindParam(':price', $data['price']);
+			$stmt->bindParam(':stock', $data['stock']);
 			return $stmt->execute();
 		}
 
 		public function update($id, $data) {
-			$stmt = $this->db->prepare("UPDATE products SET name = :name, description = :description WHERE id = :id");
+			$stmt = $this->db->prepare("UPDATE products SET name = :name, description = :description, price = :price, stock = :stock WHERE id = :id");
 			$stmt->bindParam(':name', $data['name']);
 			$stmt->bindParam(':description', $data['description']);
+			$stmt->bindParam(':price', $data['price']);
+			$stmt->bindParam(':stock', $data['stock']);
 			$stmt->bindParam(':id', $id);
 			return $stmt->execute();
 		}
