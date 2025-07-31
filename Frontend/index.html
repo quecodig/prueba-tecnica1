@@ -83,7 +83,10 @@
             if(confirm('¿Seguro que deseas eliminar este producto?')) {
                 fetch(API + id, { method: 'DELETE' })
                     .then(res => res.json())
-                    .then(() => cargarProductos());
+                    .then(() => {
+                        tbody.innerHTML = '';
+                        cargarProductos()
+                    });
             }
         }
 
